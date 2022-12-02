@@ -24,6 +24,8 @@ window.addEventListener('load', function() {
     class InputHandler {
         constructor() {
             this.keys = [];
+            this.touchY = '';
+            this.touchTreshold = 30; //how much swipe needed to perform a given action
             window.addEventListener('keydown', e => {
                 if ((   e.key === 'ArrowDown' ||
                         e.key === 'ArrowUp' ||
@@ -41,6 +43,20 @@ window.addEventListener('load', function() {
                     this.keys.splice(this.keys.indexOf(e.key), 1);
                 }
             });
+            window.addEventListener('touchstart', e => {
+                this.touchY = e.changedTouches[0].pageY;
+            });
+            window.addEventListener('touchmove', e => {
+                const swipeDistance = e.changedTouches[0].pageY - this.touchY;
+                if (swipeDistance < -this.touchTreshold && this.keys.indexOf('swipe up') === -1) this.keys.push('swipe up');
+                else if (swipeDistance > this.touchTreshold && this.keys.indexOf('swipe down') === -1) this.keys.push('swipe down');
+                if (gameOver) restartGame();
+            });
+            window.addEventListener('touchend', e => {
+                this.keys.splice(this.keys.indexOf('swipe up'), 1);
+                this.keys.splice(this.keys.indexOf('swipe down'), 1);
+
+            })
         }
     }
 
@@ -107,7 +123,7 @@ window.addEventListener('load', function() {
                 this.speed = 5
             } else if (input.keys.indexOf('ArrowLeft') > -1) {
                 this.speed = -5;
-            } else if (input.keys.indexOf('ArrowUp') > -1 && this.onGround()) {
+            } else if ((input.keys.indexOf('ArrowUp') > -1 || input.keys.indexOf('swipe up') > -1) && this.onGround()) {
                 this.velocityY -= 33;
             } else {
                 this.speed = 0;
@@ -238,10 +254,10 @@ window.addEventListener('load', function() {
         if (gameOver) {
             context.textAlign = 'center';
             context.fillStyle = 'red';
-            context.fillText('GAMEOVER, press ENTER to restart', canvas.width / 2, 200);
+            context.fillText('GAMEOVER, press ENTER or SWIPE DOWN to restart', canvas.width / 2, 200);
             context.textAlign = 'center';
             context.fillStyle = 'black';
-            context.fillText('GAMEOVER, press ENTER to restart', canvas.width / 2 + 2, 202);
+            context.fillText('GAMEOVER, press ENTER or SWIPE DOWN to restart', canvas.width / 2 + 2, 202);
         }
     }
 
@@ -280,3 +296,8 @@ window.addEventListener('load', function() {
 
 
 });
+
+/*
+NOTES
+console.log(e.changedTouches[0].pageY); <-- will console the location of touch events on mobile and touch devices
+*/
