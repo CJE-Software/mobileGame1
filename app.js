@@ -7,7 +7,7 @@ window.addEventListener('load', function() {
     //initial JavaScript setup for canvas animation and Game Development *****START*****
     const canvas = document.getElementById('canvas1');
     const ctx = canvas.getContext('2d');
-    canvas.width = 800;
+    canvas.width = 1440;
     canvas.height = 720;
     //CANVAS_WIDTH = canvas.width = 800;
     //CANVAS_HEIGHT = canvas.height = 720;
@@ -31,7 +31,7 @@ window.addEventListener('load', function() {
                         e.key === 'ArrowRight')
                         && this.keys.indexOf(e.key) === -1) {
                         this.keys.push(e.key);
-                }
+                } else if (e.key === 'Enter' && gameOver) restartGame();
             });
             window.addEventListener('keyup', e => {
                 if (    e.key === 'ArrowDown' ||
@@ -50,7 +50,7 @@ window.addEventListener('load', function() {
             this.gameHeight = gameHeight;
             this.width = 200;
             this.height = 200;
-            this.x = 0;
+            this.x = 100;
             this.y = this.gameHeight - this.height;
             this.image = document.getElementById('playerImage');
             this.frameX = 0;
@@ -62,6 +62,12 @@ window.addEventListener('load', function() {
             this.speed = 0; //if pos move toon right if neg move toon left
             this.velocityY = 0; //vertical jump speed
             this.weight = 1; //gravity or opposing force to bring toon back down
+        }
+        restart() {
+            this.x = 100;
+            this.y = this.gameHeight - this.height;
+            this.maxFrame = 8;
+            this.frameY = 0;
         }
         draw(context) {
             //context.fillStyle = 'red';
@@ -149,6 +155,9 @@ window.addEventListener('load', function() {
             this.x -= this.speed;
             if (this.x < 0 - this.width) this.x = 0;
         }
+        restart() {
+            this.x = 0;
+        }
     }
 
     class Enemy {
@@ -220,6 +229,7 @@ window.addEventListener('load', function() {
     }
 
     function displayStatusText(context) {
+        context.textAlign = 'left';
         context.font = '40px Helvetica';
         context.fillStyle = 'red';
         context.fillText('Score: ' + score, 20, 50);
@@ -228,11 +238,20 @@ window.addEventListener('load', function() {
         if (gameOver) {
             context.textAlign = 'center';
             context.fillStyle = 'red';
-            context.fillText('GAMEOVER', canvas.width / 2, 200);
+            context.fillText('GAMEOVER, press ENTER to restart', canvas.width / 2, 200);
             context.textAlign = 'center';
             context.fillStyle = 'black';
-            context.fillText('GAMEOVER', canvas.width / 2 + 2, 202);
+            context.fillText('GAMEOVER, press ENTER to restart', canvas.width / 2 + 2, 202);
         }
+    }
+
+    function restartGame() {
+        player.restart();
+        background.restart();
+        enemies = [];
+        score = 0;
+        gameOver = false;
+        animate(0);
     }
 
     const input = new InputHandler(); //by instantiating the code here all the code in the class called InputHandler() will be run ^.^
