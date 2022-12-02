@@ -20,6 +20,7 @@ window.addEventListener('load', function() {
     let enemies = [];
     let score = 0;
     let gameOver = false;
+    const fullscreenButton = document.getElementById('fullscreenButton');
 
     class InputHandler {
         constructor() {
@@ -270,6 +271,16 @@ window.addEventListener('load', function() {
         animate(0);
     }
 
+    function toggleFullscreen() {
+        console.log(document.fullscreenElement);
+        if (!document.fullscreenElement) {
+            canvas.requestFullscreen().catch(err => {
+                alert(``)
+            });
+        }
+    }
+    toggleFullscreen();
+
     const input = new InputHandler(); //by instantiating the code here all the code in the class called InputHandler() will be run ^.^
     const player = new Player(canvas.width, canvas.height);
     const background = new Background(canvas.width, canvas.height);
@@ -300,4 +311,9 @@ window.addEventListener('load', function() {
 /*
 NOTES
 console.log(e.changedTouches[0].pageY); <-- will console the location of touch events on mobile and touch devices
+the 'JavaScript Fullscreen API' gives us methods that allow us to present a specific element and it's descendants in full screen mode, it will hide all browser user interface elements, sidebars, and other applications as long as full screen is active
+document.fullscreenElement <---is a built in read only property on the document object that returns the element that is currently being presented in full screen mode, if it is 'null' it means full screen is not active
+the '.requestFullscreen()' method is asynchronous and returns a promise which means you can chain '.then()' and '.catch()' methods to it
+example:  canvas.requestFullscreen().then().catch()
+to concatenate you use 'back ticks' this is known as 'template literal syntax refer to toggleFullscreen function for an example
 */
