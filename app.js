@@ -105,10 +105,10 @@ window.addEventListener('load', function() {
         update(input, deltaTime, enemies) {
             //collision detection between circles below
             enemies.forEach(enemy => {
-                const dx = (enemy.x + enemy.width / 10) - (this.x + this.width / 10);
-                const dy = (enemy.y + enemy.height / 10) - (this.y + this.height / 10);
+                const dx = (enemy.x + enemy.width / 2 - 20) - (this.x + this.width / 2);
+                const dy = (enemy.y + enemy.height / 2) - (this.y + this.height / 2 + 20);
                 const distance = Math.sqrt(dx * dx + dy * dy);
-                if (distance < enemy.width / 2.8 + this.width / 2.8) {
+                if (distance < enemy.width / 3 + this.width / 3) {
                     gameOver = true;
                 }
             });
@@ -275,11 +275,13 @@ window.addEventListener('load', function() {
         console.log(document.fullscreenElement);
         if (!document.fullscreenElement) {
             canvas.requestFullscreen().catch(err => {
-                alert(``)
+                alert(`Error, cannot enable fullscreen mode: ${err.message}`);
             });
+        } else {
+            document.exitFullscreen();
         }
     }
-    toggleFullscreen();
+    fullscreenButton.addEventListener('click', toggleFullscreen());
 
     const input = new InputHandler(); //by instantiating the code here all the code in the class called InputHandler() will be run ^.^
     const player = new Player(canvas.width, canvas.height);
@@ -316,4 +318,51 @@ document.fullscreenElement <---is a built in read only property on the document 
 the '.requestFullscreen()' method is asynchronous and returns a promise which means you can chain '.then()' and '.catch()' methods to it
 example:  canvas.requestFullscreen().then().catch()
 to concatenate you use 'back ticks' this is known as 'template literal syntax refer to toggleFullscreen function for an example
+'template literals' are delimited with backticks (` template literal string here ${ some javascript object or variable } `), template literals provide simpler syntax for embedding ${expressions} within strings, template literals can also do other things, they arent string literals and can't be used everywhere a string literal can be used
+
+there is also the built in method 'document.exitFullscreen()' which will do as the name implies...exit fullscreen view mode
+fullscreen cannot be enbaled on page load it can only be triggered by user events such as click or touch
+to initiate the toggleFullscreen() function you can wrap the function inside of an eventListener ie: fullscreenButton.addEventListener('click', toggleFullscreen());
+
+to draw a simple circle around an object on the canvas you can go inside of it's built in draw() method (assuming it has a draw() method on the class) and place this code inside the draw() method
+CODE
+    draw(context) {
+        context.lineWidth = 5;
+        context.strokeStyle = 'white';
+        context.beginPath();
+        context.arc(this.x + this.width/2, this.y + this.height/2, this.width/2, 0, Math.PI * 2);
+        context.stroke();
+        !extra code to draw the image associated with this class START!
+        context.drawImage(this.image, this.frameX * this.width, this.frameY * this.height, this.width, this.height, this.x, this.y, this.width, this.height);
+        !extra code to draw the image associated with this class END!
+    }
+CODE
+^^^the above code will draw a circle around the object, this is very useful for calibrating hit boxes when implementing 2d collision
+
+2d circular collision algorithm and logic below:
+CODE
+    enemies.forEach(enemy => {
+        const distanceX = (enemy.x + enemy.width/2) - (this.x + this.width/2);
+        const distanceY = (enemy.y + enemy.height/2) - (this.y + this.height/2);
+        const distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
+        if (distance < enemy.width/2 + this.width/2) {
+            gameOver = true;
+        }
+    })
+CODE
+^^^the above code uses the pythagorean theorem to calculate the distance between one object and another, it does this by checking to see whether the distance between two objects is less than the some of their radii. so a circle with a diameter of 2inches(your character) and another circle with a diameter of 4 inches(an enemy) have a combined radii of (1(toon radius) + 2(enemy radius)) = 3inches... if the distance between the two circle objects ever reaches at or below 3inches then the objects have collided. this distance is checked for every frame of the game (on average 16 times per second and on native hardware with no delimiting variables 60 frames per second) object collision is compute intensive so be careful when adding collision mechanics to your games ESPECIALLY BROWSER GAMES as you do not have infinite compute resources) for object collision it is best to implement the logic on entire classes I.E. checking against your Player class and the Enemy class. if the environment of your game needs to be checked for collision ensure that the objects you will be checking for instances of collision are tightly associated with one another (uniform sizes across variables that can instigate collision logic)
+
+context.arc(this.x + this.width/2, ?, ?, ?, ?) <---gives you the horizontal (coordinates) center point of player object
+
+context.arc(?, this.y + this.height/2, ?, ?, ?) <---gives you the vertical (coordinates) center point of the character [if you were to add to this distance or subtract from this distance you can move the hit box up or down on the vertical axis] EXAMPLE context.arc(?, this.y + this.height/2 + 20, ?, ?, ?) <- would lower the hitbox by 20pixels on your character object, pushing your players hit box closer to the ground
+
+context.arc(?, ?, this.width/2, ?, ?) <--- this is the radius of the collision circle of the player object [if you wanted the area of the collision circle to be smaller you could divide by a bigger number to create a smaller circle hence a small radius] EXAMPLE context.arc(?, ?, this.width/3, ?, ?) <- would create a smaller circle aka SMALLER HITBOX
+
+context.arc(?, ?, ?, 0, ?) <---
+
+context.arc(?, ?, ?, ?, Math.PI * 2) <---
+
+
+
+
 */
